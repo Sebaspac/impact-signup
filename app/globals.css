@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+/* Schriften lokal — die Website verbietet externe Schriftserver ausdrücklich
+   (DESIGN.md: "Keine externen Anfragen: keine CDNs, Fonts, Analytics").
+   Vorher lud diese App Bebas Neue und Inter über next/font/google. */
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/BarlowCondensed-500.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/BarlowCondensed-600.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/BarlowCondensed-700.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/Inter-400.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/Inter-500.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/Inter-600.woff2') format('woff2'); }
+
+/* Palette 1:1 aus assets/css/site.css der Website übernommen. */
+:root {
+  --bg:        #171d2c;
+  --bg-raise:  #1e2537;
+  --surface:   #242c42;
+  --line:      #323c58;
+  --line-soft: #2a344c;
+  --text:      #f5f6f8;
+  --text-2:    #bac0ce;
+  --text-3:    #8f96a9;
+  --red:       #dd3333;
+  --red-hot:   #ef4444;
+  --blue:      #4a9fd4;
+  --font-disp: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-text: 'Inter', system-ui, -apple-system, sans-serif;
+  --r:         10px;
+  --ease:      cubic-bezier(.16, 1, .3, 1);
+}
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 400 16px/1.65 var(--font-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-disp);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: .005em;
+  text-transform: uppercase;
+  margin: 0 0 .45em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--red-hot);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection { background: var(--red); color: #fff; }
+
+/* --- Bausteine, die dem Vokabular der Website entsprechen --- */
+
+.ifa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-family: var(--font-disp);
+  font-weight: 600;
+  font-size: 1.08rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 15px 26px 14px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background .18s var(--ease), border-color .18s var(--ease), transform .18s var(--ease);
+}
+.ifa-btn:hover { transform: translateY(-1px); }
+.ifa-btn:active { transform: translateY(0); }
+.ifa-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+.ifa-btn-red { background: var(--red); color: #fff; }
+.ifa-btn-red:hover:not(:disabled) { background: var(--red-hot); }
+.ifa-btn-line { border-color: var(--line); color: var(--text); background: transparent; }
+.ifa-btn-line:hover { border-color: var(--text-3); background: rgba(255, 255, 255, .04); }
+
+.ifa-field label {
+  display: block;
+  font-size: .9rem;
+  font-weight: 500;
+  color: var(--text-2);
+  margin-bottom: 6px;
+}
+.ifa-field input,
+.ifa-field select {
+  width: 100%;
+  background: var(--bg-raise);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  padding: 12px 14px;
+  transition: border-color .18s var(--ease);
+}
+.ifa-field input:focus,
+.ifa-field select:focus { outline: none; border-color: var(--red-hot); }
+.ifa-field input[aria-invalid="true"],
+.ifa-field select[aria-invalid="true"] { border-color: var(--red-hot); }
+
+.ifa-error { color: var(--red-hot); font-size: .85rem; margin-top: 6px; }
+
+.ifa-card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  padding: clamp(20px, 3vw, 28px);
+}
+
+/* Tarifkachel */
+.ifa-option {
+  text-align: left;
+  width: 100%;
+  background: var(--bg-raise);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: border-color .18s var(--ease), background .18s var(--ease), transform .18s var(--ease);
+}
+.ifa-option:hover { border-color: var(--line); transform: translateY(-2px); }
+.ifa-option[aria-pressed="true"] {
+  border-color: var(--red);
+  background: color-mix(in srgb, var(--red) 10%, var(--bg-raise));
+}
+.ifa-option .name {
+  display: block;
+  font-family: var(--font-disp);
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+.ifa-option .meta {
+  display: block;
+  color: var(--text-2);
+  font-size: .9rem;
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
