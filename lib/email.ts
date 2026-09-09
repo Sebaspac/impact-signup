@@ -1,5 +1,6 @@
 import { Resend } from "resend";
-import { getSupabaseAdmin } from "./supabase";
+import { getStore } from "./store";
+import { isDemoMode } from "./demo";
 import { SITE_LINKS } from "./config";
 
 function getResend() {
@@ -34,29 +35,41 @@ async function send(
   subject: string,
   html: string
 ): Promise<SendResult> {
+  const body = wrap(html);
   let result: SendResult;
-  try {
-    const resend = getResend();
-    const { error } = await resend.emails.send({
-      from: FROM_ADDRESS,
-      to,
-      subject,
-      html: wrap(html),
-    });
-    result = error ? { ok: false, error: error.message } : { ok: true };
-  } catch (err) {
-    result = { ok: false, error: err instanceof Error ? err.message : "unbekannt" };
+
+  if (isDemoMode()) {
+    // Im Demo-Modus wird nichts verschickt. Die Mail landet im Postfach
+    // unter /demo/postfach — so ist sie vorführbar, ohne dass jemand
+    // versehentlich echte Post bekommt.
+    result = { ok: true };
+  } else {
+    try {
+      const resend = getResend();
+      const { error } = await resend.emails.send({
+        from: FROM_ADDRESS,
+        to,
+        subject,
+        html: body,
+      });
+      result = error ? { ok: false, error: error.message } : { ok: true };
+    } catch (err) {
+      result = { ok: false, error: err instanceof Error ? err.message : "unbekannt" };
+    }
+    if (!result.ok) {
+      console.error(`Mailversand fehlgeschlagen (${emailType} an ${to}):`, result.error);
+    }
   }
 
-  if (!result.ok) console.error(`Mailversand fehlgeschlagen (${emailType} an ${to}):`, result.error);
-
   try {
-    await getSupabaseAdmin().from("email_log").insert({
-      member_id: memberId,
-      email_type: emailType,
-      sent_to: to,
+    await getStore().logEmail({
+      memberId,
+      emailType,
+      sentTo: to,
       status: result.ok ? "sent" : "failed",
-      error_message: result.ok ? null : result.error,
+      errorMessage: result.ok ? null : result.error,
+      subject,
+      html: body,
     });
   } catch (err) {
     // Protokollfehler darf den Versand nie zum Scheitern bringen.

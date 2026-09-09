@@ -20,6 +20,12 @@ function required(name: string): string {
 
 /** Eigene Basis-URL dieser Anwendung, z. B. https://anmeldung.impact-fightacademy.de */
 export function baseUrl(): string {
+  // Im Demo-Modus soll die Vorführung ohne jede Konfiguration starten.
+  // Im Echtbetrieb bleibt die Variable Pflicht — dort darf die Weiterleitung
+  // nach der Zahlung nicht auf einem geratenen Wert landen.
+  if (process.env.DEMO_MODE === "true" && !process.env.NEXT_PUBLIC_BASE_URL) {
+    return "http://localhost:3000";
+  }
   return required("NEXT_PUBLIC_BASE_URL");
 }
 

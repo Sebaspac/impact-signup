@@ -23,6 +23,51 @@ passiert, entscheidet ihr.
 
 ---
 
+## Demo-Modus — sofort ausprobieren, ohne irgendein Konto
+
+Zum Testen und Vorführen. Kein Stripe, kein Supabase, kein Resend nötig.
+
+```bash
+npm install
+echo "DEMO_MODE=true" > .env.local
+echo "INTERNAL_NOTIFY_EMAIL=info@impact-fightacademy.de" >> .env.local
+npm run dev
+```
+
+Dann `http://localhost:3000` öffnen.
+
+| Seite | Was da passiert |
+|---|---|
+| `/` | Das echte Anmeldeformular, mit gelbem Demo-Hinweis |
+| `/demo` | Übersicht: Mitglieder, Zahlungsereignisse, Kennzahlen — plus Knöpfe, um Zahlungsausfälle und Kündigungen auszulösen |
+| `/demo/postfach` | Alle E-Mails, die verschickt worden wären, vollständig gerendert |
+| `/demo/kasse` | Nachgebaute Kassenseite (fragt bewusst keine Kartendaten ab) |
+| `/qr-code` | Druckbarer QR-Code |
+
+**Ein Durchlauf zum Vorführen:**
+
+1. Formular ausfüllen und absenden → Eintrag erscheint unter `/demo` mit Status
+   „Wartet auf Zahlung", im Postfach liegen Anmeldebestätigung und interne Meldung
+2. Auf der Kassenseite „Zahlung erfolgreich" → Status wird „Aktiv",
+   Zahlungsbestätigung kommt ins Postfach
+3. Unter `/demo` auf „Abbuchung scheitern lassen" → Status „Zahlung fehlgeschlagen",
+   Mitglied und Team werden benachrichtigt
+4. „Karte repariert — Abbuchung klappt" → Status wieder „Aktiv", Entwarnung geht raus
+5. „Alles zurücksetzen" leert die Demo-Daten
+
+Was dabei echt ist: die gesamte Lebenszyklus-Logik in `lib/lifecycle.ts` — Demo und
+Echtbetrieb durchlaufen denselben Code. Nachgebaut sind nur die drei äußeren
+Dienste (Datenbank, Zahlung, Mailversand). Eine Vorführung, die anderen Code
+ausführt als die Produktion, würde nichts beweisen.
+
+Die Daten liegen in `.demo-data/db.json` und überleben einen Neustart.
+
+**Sicherung:** Der Demo-Modus schaltet sich selbst ab, sobald ein
+`sk_live_`-Stripe-Schlüssel gesetzt ist — er kann also nicht versehentlich im
+Echtbetrieb greifen und dort echte Zahlungen verschlucken.
+
+---
+
 ## ⚠️ Vor dem Livegang unbedingt lesen
 
 **Die Preise dieses Systems müssen mit `INHALT_PREISE.md` der Website übereinstimmen.**
